@@ -1829,19 +1829,20 @@
                         agente de inteligencia iniciará contacto en breve.</p>
                 </div>
 
-                <form id="mission-form">
+                <form id="mission-form" action="https://formspree.io/f/xpqwvyqo" method="POST">
                     <div class="holo-input-group">
-                        <input type="text" class="holo-input" placeholder=" " required>
+                        <input type="text" name="name" class="holo-input" placeholder=" " required>
                         <label class="holo-label">Identificación / Empresa</label>
                         <span class="holo-bar"></span>
                     </div>
                     <div class="holo-input-group">
-                        <input type="email" class="holo-input" placeholder=" " required>
+                        <input type="email" name="email" class="holo-input" placeholder=" " required>
                         <label class="holo-label">Protocolo de Contacto (Email)</label>
                         <span class="holo-bar"></span>
                     </div>
                     <div class="holo-input-group">
-                        <textarea class="holo-input" rows="1" placeholder=" " required style="resize:none"></textarea>
+                        <textarea name="message" class="holo-input" rows="1" placeholder=" " required
+                            style="resize:none"></textarea>
                         <label class="holo-label">Detalles de la Misión</label>
                         <span class="holo-bar"></span>
                     </div>
@@ -2046,14 +2047,39 @@
         const btnProgress = document.getElementById('btn-progress');
         const successOverlay = document.getElementById('form-success');
 
-        missionForm.addEventListener('submit', (e) => {
+        missionForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             btnText.textContent = "Transmitiendo...";
             btnProgress.style.width = "100%";
+            submitBtn.disabled = true;
 
-            setTimeout(() => {
-                successOverlay.classList.add('active');
-            }, 1500);
+            try {
+                const formData = new FormData(missionForm);
+                const response = await fetch(missionForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    setTimeout(() => {
+                        successOverlay.classList.add('active');
+                        missionForm.reset();
+                        btnText.textContent = "Ejecutar Transmisión";
+                        btnProgress.style.width = "0%";
+                        submitBtn.disabled = false;
+                    }, 1500);
+                } else {
+                    throw new Error('Error en el envío');
+                }
+            } catch (error) {
+                btnText.textContent = "Error - Reintentar";
+                btnProgress.style.width = "0%";
+                submitBtn.disabled = false;
+                console.error('Error:', error);
+            }
         });
 
         /* --- SCROLL REVEAL ANIMATION --- */
